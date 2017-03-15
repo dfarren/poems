@@ -2,6 +2,8 @@ from HTMLParser import HTMLParser
 import cPickle
 import re
 import gzip
+from datetime import datetime
+import pdb
 
 class MyHTMLParser(HTMLParser):
 
@@ -33,7 +35,7 @@ class MyHTMLParser(HTMLParser):
     def handle_data(self, data):
 
         if self.poem:
-            pattern = re.compile('[\W_]+')
+            pattern = re.compile('[^a-zA-Z\d\s:]')
             data = pattern.sub('', data)
 
             if self.author and data not in self.poems:
@@ -124,6 +126,7 @@ def parse(poems_path):
 #
 #     return survival
 
+
 def match_poems_with_gutenberg(poems_file_loc, gutenberg_file_loc):
     jaccard_similarity = {}
 
@@ -133,12 +136,16 @@ def match_poems_with_gutenberg(poems_file_loc, gutenberg_file_loc):
     with gzip.open(gutenberg_file_loc, 'rb') as f:
         gutenberg_titles = cPickle.load(f)
 
+    print "nbr of poems: %d" % count_poems(poems)
+    iter = 0
     for author, author_dct in poems.iteritems():
         for poem_title in author_dct.iterkeys():
-
             jaccard_similarity[poem_title] = 0.0
             for gutenberg_title in gutenberg_titles:
                 jaccard_similarity[poem_title] = max(calculate_jaccard_similarity(frozenset(poem_title.split()), gutenberg_title), jaccard_similarity[poem_title])
+            iter+=1
+            if iter%100 == 0:
+                print "%s: processed %d poems" % (datetime.now(), iter)
 
     return jaccard_similarity
 
@@ -162,7 +169,7 @@ if __name__=='__main__':
     labels_path = 'labels.pkl'
     PICKLEFILE = '/tmp/md.pickle.gz'
 
-    print "parsing poems corpus"
+    # print "parsing poems corpus"
     with open(poems_path, 'wb') as f:
        cPickle.dump(parse(mypath), f)
 

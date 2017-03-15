@@ -235,4 +235,6 @@ def safeunicode(arg, *args, **kwargs):
 __all__ = ['readmetadata']
 
 if __name__ == '__main__':
-    readmetadata()
+    import pdb
+    titles = readmetadata()
+    pdb.set_trace()
