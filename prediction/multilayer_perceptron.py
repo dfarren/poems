@@ -26,18 +26,19 @@ import pdb
 # General parameters
 flags = tf.app.flags
 FLAGS = flags.FLAGS
-flags.DEFINE_float('learning_rate', 0.01, 'initial learning rate')
-flags.DEFINE_integer('num_epochs', 1, 'number of epochs to run trainer')
+flags.DEFINE_float('learning_rate', 0.001, 'initial learning rate')
+flags.DEFINE_integer('num_epochs', 2, 'number of epochs to run trainer')
 flags.DEFINE_integer('batch_size', 500, 'size of the minibatch')
 flags.DEFINE_integer('display_step', 10, 'number of batch-steps after which to display results')
-flags.DEFINE_float('keep_prob', 0.85, 'probability of keeping data after dropout')
+flags.DEFINE_float('keep_prob', 0.8, 'probability of keeping data after dropout')
 
-flags.DEFINE_string('data_dir', '../', 'directory with all the data')
-flags.DEFINE_string('summaries_dir', 'summary/', 'directory with summary')
-flags.DEFINE_string('save_dir', 'savedmodel/', 'directory with saved model')
-
+flags.DEFINE_string('data_dir', '/afs/.ir.stanford.edu/users/d/f/dfarren/poems_CI/', 'directory with all the data')
+flags.DEFINE_string('summaries_dir', '/afs/.ir.stanford.edu/users/d/f/dfarren/poems_CI/prediction/summary/', 'directory with summary')
+flags.DEFINE_string('save_dir', '/afs/.ir.stanford.edu/users/d/f/dfarren/poems_CI/prediction/savedmodel/', 'directory with saved model')
 # Neural network parameters
 flags.DEFINE_integer('n_input', 50, 'dimension of the input')
+flags.DEFINE_integer('n_hidden_1', 128, 'number of neurons in the first hidden layer')
+flags.DEFINE_integer('n_hidden_2', 85, 'number of neurons in the first hidden layer')
 flags.DEFINE_integer('n_hidden_1', 64, 'number of neurons in the first hidden layer')
 flags.DEFINE_integer('n_hidden_2', 32, 'number of neurons in the first hidden layer')
 flags.DEFINE_integer('n_classes', 2, 'number of categories')
