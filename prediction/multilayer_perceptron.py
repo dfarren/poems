@@ -26,20 +26,20 @@ import pdb
 # General parameters
 flags = tf.app.flags
 FLAGS = flags.FLAGS
-flags.DEFINE_float('learning_rate', 0.001, 'initial learning rate')
-flags.DEFINE_integer('num_epochs', 2, 'number of epochs to run trainer')
+flags.DEFINE_float('learning_rate', 0.01, 'initial learning rate')
+flags.DEFINE_integer('num_epochs', 1, 'number of epochs to run trainer')
 flags.DEFINE_integer('batch_size', 500, 'size of the minibatch')
 flags.DEFINE_integer('display_step', 10, 'number of batch-steps after which to display results')
-flags.DEFINE_float('keep_prob', 0.8, 'probability of keeping data after dropout')
+flags.DEFINE_float('keep_prob', 0.85, 'probability of keeping data after dropout')
 
-flags.DEFINE_string('data_dir', '/afs/.ir.stanford.edu/users/d/f/dfarren/poems_CI/', 'directory with all the data')
-flags.DEFINE_string('summaries_dir', '/afs/.ir.stanford.edu/users/d/f/dfarren/poems_CI/prediction/summary/', 'directory with summary')
-flags.DEFINE_string('save_dir', '/afs/.ir.stanford.edu/users/d/f/dfarren/poems_CI/prediction/savedmodel/', 'directory with saved model')
+flags.DEFINE_string('data_dir', '../', 'directory with all the data')
+flags.DEFINE_string('summaries_dir', 'summary/', 'directory with summary')
+flags.DEFINE_string('save_dir', 'savedmodel/', 'directory with saved model')
 
 # Neural network parameters
 flags.DEFINE_integer('n_input', 50, 'dimension of the input')
-flags.DEFINE_integer('n_hidden_1', 128, 'number of neurons in the first hidden layer')
-flags.DEFINE_integer('n_hidden_2', 85, 'number of neurons in the first hidden layer')
+flags.DEFINE_integer('n_hidden_1', 64, 'number of neurons in the first hidden layer')
+flags.DEFINE_integer('n_hidden_2', 32, 'number of neurons in the first hidden layer')
 flags.DEFINE_integer('n_classes', 2, 'number of categories')
 
 # Load data
@@ -101,7 +101,6 @@ def bias_variable(shape):
     initial = tf.truncated_normal(shape, stddev=0.1)
     return tf.Variable(initial)
 
-
 # Layer
 def nn_layer(input_tensor, input_dim, output_dim, layer_name, act=tf.nn.relu):
     with tf.name_scope(layer_name):
@@ -113,8 +112,9 @@ def nn_layer(input_tensor, input_dim, output_dim, layer_name, act=tf.nn.relu):
         with tf.name_scope('Wx_plus_b'):
             preactivate = tf.add(tf.matmul(input_tensor, weights), biases)
 
+        print(preactivate)
         if act is not None:
-            activations = act(preactivate, 'activation')
+            activations = act(preactivate, name='activation')
         else:
             activations = preactivate
 
@@ -125,7 +125,7 @@ def cal_cross_entropy(pred, labels, name):
     with tf.name_scope(name):
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=labels))
 
-        _ = tf.scalar_summary(name + ' ' + 'cross entropy', loss)
+        _ = tf.summary.scalar(name + ' ' + 'cross entropy', loss)
 
     return loss
 
@@ -143,10 +143,10 @@ def multilayer_perceptron(X, y, keep_prob, name):
         with tf.name_scope('dropout_layer_2'):
             layer_2 = tf.nn.dropout(layer_2, keep_prob)
 
-        pred = nn_layer(layer_2, FLAGS.n_hidden_2, FLAGS.n_classes, 'output', act=None)
+        pred = nn_layer(layer_2, FLAGS.n_hidden_2, FLAGS.n_classes, 'output_loss', act=tf.nn.relu)
         loss = cal_cross_entropy(pred, y, name)
 
-        labels_pred = nn_layer(layer_2, FLAGS.n_hidden_2, FLAGS.n_classes, 'output', act=tf.nn.softmax)
+        labels_pred = nn_layer(layer_2, FLAGS.n_hidden_2, FLAGS.n_classes, 'output_pred', act=tf.nn.softmax)
         
     return loss, labels_pred 
     
@@ -178,10 +178,10 @@ def evaluate (preds, labels, name):
                         lambda: (TP + TN) / (TP + TN + FP + FN),
                         lambda: tf.constant(0.0))
 
-        _ = tf.scalar_summary(name + ' ' + 'precision', precision)
-        _ = tf.scalar_summary(name + ' ' + 'recall', recall)
-        _ = tf.scalar_summary(name + ' ' + 'F1', f1)
-        _ = tf.scalar_summary(name + ' ' + 'accuracy', acc)
+        _ = tf.summary.scalar(name + ' ' + 'precision', precision)
+        _ = tf.summary.scalar(name + ' ' + 'recall', recall)
+        _ = tf.summary.scalar(name + ' ' + 'F1', f1)
+        _ = tf.summary.scalar(name + ' ' + 'accuracy', acc)
 
     return precision, recall, f1, acc 
 
@@ -194,7 +194,7 @@ xentropy_loss_val, labels_pred_val = multilayer_perceptron(X, y, keep_prob, "val
 precision_val, recall_val, f1_val, acc_val = evaluate(labels_pred_val, y, "val")
 
 # The op for initializing the variables.
-init_op = tf.group(tf.initialize_all_variables(), tf.initialize_local_variables())
+init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
 
 # Save best model so far
 saver = tf.train.Saver()
@@ -203,8 +203,8 @@ best_val_xentropy = float('inf')
 # Launch the graph & training
 with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
     # Merge all summaries together and write them to summaries_dir
-    merged = tf.merge_all_summaries()
-    writer = tf.train.SummaryWriter('%s' % (FLAGS.summaries_dir), sess.graph)
+    merged = tf.summary.merge_all()
+    writer = tf.summary.FileWriter('%s' % (FLAGS.summaries_dir), sess.graph)
                 
     # Initialize the variables (the trained variables and the epoch counter).
     sess.run(init_op)    
@@ -266,8 +266,8 @@ with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
     else:
         print("No Checkpoint Found")
     ops_test = [merged, xentropy_loss, precision, recall, f1, acc]
-    test_summary, test_loss, test_pre, test_rec, test_f1, test_acc = sess.run(ops_test, feed_dict = {X: test_X,
-                                                                                                     y: test_y,
-                                                                                                     keep_prob: 1})
-    print('Test: F1 score = %.6f, Accuracy = %.6f' % (test_f1, test_acc))
+    # test_summary, test_loss, test_pre, test_rec, test_f1, test_acc = sess.run(ops_test, feed_dict = {X: test_X,
+    #                                                                                                 y: test_y,
+    #                                                                                                 keep_prob: 1})
+    # print('Test: F1 score = %.6f, Accuracy = %.6f' % (test_f1, test_acc))
     
