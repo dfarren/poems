@@ -203,7 +203,7 @@ best_val_xentropy = float('inf')
 # Launch the graph & training
 with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
     # Merge all summaries together and write them to summaries_dir
-    merged = tf.summary.merge()
+    merged = tf.summary.merge_all()
     writer = tf.summary.FileWriter('%s' % (FLAGS.summaries_dir), sess.graph)
                 
     # Initialize the variables (the trained variables and the epoch counter).
@@ -215,11 +215,8 @@ with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
     
         for step in xrange((number_batch + 1) * epoch, (number_batch + 1)*(epoch + 1)):
             new_step = step % (number_batch + 1)
-            start = FLAGS.display * new_step
+            start = FLAGS.batch_size * new_step
             end = min(FLAGS.batch_size * (new_step + 1), train_y.shape[0]) - 1
-
-            #batch_x = train_X[(FLAGS.batch_size * step):min(FLAGS.batch_size * (step + 1), train_y.shape[0]) - 1,]
-            #batch_y = train_y[(FLAGS.batch_size * step):min(FLAGS.batch_size * (step + 1), train_y.shape[0]) - 1,]
 
             batch_x = train_X[start:end, ]
             batch_y = train_y[start:end, ]
