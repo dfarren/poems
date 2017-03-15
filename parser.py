@@ -1,9 +1,7 @@
 from HTMLParser import HTMLParser
-from gutenberg.query import get_etexts
 import cPickle
 import re
 import gzip
-import pdb
 
 class MyHTMLParser(HTMLParser):
 
