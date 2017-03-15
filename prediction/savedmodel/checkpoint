@@ -1,0 +1,2 @@
+model_checkpoint_path: "/afs/.ir.stanford.edu/users/d/f/dfarren/poems_CI/prediction/savedmodel/model.ckpt-0"
+all_model_checkpoint_paths: "/afs/.ir.stanford.edu/users/d/f/dfarren/poems_CI/prediction/savedmodel/model.ckpt-0"
