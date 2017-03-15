@@ -131,7 +131,7 @@ def match_poems_with_gutenberg(poems_file_loc, gutenberg_file_loc):
         poems = cPickle.load(f)
 
     with gzip.open(gutenberg_file_loc, 'rb') as f:
-        gutenberg_titles = cPickle.load()
+        gutenberg_titles = cPickle.load(f)
 
     for author, author_dct in poems.iteritems():
         for poem_title in author_dct.iterkeys():
