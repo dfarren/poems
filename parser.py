@@ -3,6 +3,7 @@ import cPickle
 import re
 import gzip
 from datetime import datetime
+import poetrytools
 import pdb
 
 class MyHTMLParser(HTMLParser):
@@ -162,20 +163,47 @@ def count_poems(poems):
     return cnt
 
 
+def add_poem_form(poems_file_loc):
+
+    form = {}
+
+    with open(poems_file_loc, 'rb') as f:
+        poems = cPickle.load(f)
+
+    print "nbr of poems: %d" % count_poems(poems)
+    iter = 0
+    for author, author_dct in poems.iteritems():
+        for poem_title, poem in author_dct.iteritems():
+            try:
+                form[poem_title] = poetrytools.guess_form(poem)
+            except:
+                pass
+            iter+=1
+            if iter%100 == 0:
+                print "%s: processed %d poems" % (datetime.now(), iter)
+
+    return form
+
+
 if __name__=='__main__':
 
-    mypath = 'chadh-poetry/'
+    mypath = 'chadh-poetry'
     poems_path = 'poems.pkl'
     labels_path = 'labels.pkl'
+    treatment_path = 'treatment.pkl'
     PICKLEFILE = '/tmp/md.pickle.gz'
 
-    # print "parsing poems corpus"
+    print "parsing poems corpus"
     with open(poems_path, 'wb') as f:
        cPickle.dump(parse(mypath), f)
 
     print "matching poems with gutenberg"
     with open(labels_path, 'wb') as f:
         cPickle.dump(match_poems_with_gutenberg(poems_path, PICKLEFILE), f)
+
+    print "adding treatment variable (poem form)"
+    with open(treatment_path, 'wb') as f:
+        cPickle.dump(add_poem_form(poems_path), f)
 
     print "done"
 

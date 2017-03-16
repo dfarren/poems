@@ -39,8 +39,6 @@ flags.DEFINE_string('save_dir', '/afs/.ir.stanford.edu/users/d/f/dfarren/poems_C
 flags.DEFINE_integer('n_input', 50, 'dimension of the input')
 flags.DEFINE_integer('n_hidden_1', 128, 'number of neurons in the first hidden layer')
 flags.DEFINE_integer('n_hidden_2', 85, 'number of neurons in the first hidden layer')
-flags.DEFINE_integer('n_hidden_1', 64, 'number of neurons in the first hidden layer')
-flags.DEFINE_integer('n_hidden_2', 32, 'number of neurons in the first hidden layer')
 flags.DEFINE_integer('n_classes', 2, 'number of categories')
 
 # Load data

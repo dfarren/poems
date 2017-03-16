@@ -236,5 +236,5 @@ __all__ = ['readmetadata']
 
 if __name__ == '__main__':
     import pdb
-    titles = readmetadata()
+    gut = readmetadata()
     pdb.set_trace()
